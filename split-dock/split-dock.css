@@ -11,12 +11,17 @@ body {
     background: #1e1e1e;
 }
 
+/* Root frame only */
+#app.sd-frame {
+    width: 100%;
+    height: 100vh;
+}
+
 /* Frame - can contain multiple docks in split view */
 .sd-frame {
     display: flex;
     flex-direction: row;
-    width: 100%;
-    height: 100vh;
+    flex: 1;
     min-width: 0;
     min-height: 0;
 }
@@ -89,6 +94,14 @@ body {
     opacity: 0.5;
 }
 
+.sd-panel-title.drop-before {
+    border-left: 3px solid #1e88e5;
+}
+
+.sd-panel-title.drop-after {
+    border-right: 3px solid #1e88e5;
+}
+
 .sd-panel-title-text {
     pointer-events: none;
 }
@@ -130,6 +143,12 @@ body {
     outline: 3px solid #0e639c;
     outline-offset: -3px;
     background: rgba(14, 99, 156, 0.1);
+}
+
+.sd-dock.drop-navbar .sd-dock-navbar {
+    background: rgba(14, 99, 156, 0.3);
+    outline: 2px solid #1e88e5;
+    outline-offset: -2px;
 }
 
 .sd-dock.drop-top::before,

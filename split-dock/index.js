@@ -9,6 +9,7 @@ export class SplitDock {
         this.draggedPanel = null;
         this.draggedFromDock = null;
         this.dragGhost = null;
+        this.currentHoverDock = null;
     }
 
     // Initialize framework by loading window elements from HTML
@@ -44,11 +45,15 @@ export class SplitDock {
 
         // Clear all drop indicators
         this.getAllDocks().forEach(dock => {
-            dock.element.classList.remove('drop-center', 'drop-top', 'drop-bottom', 'drop-left', 'drop-right');
+            dock.element.classList.remove('drop-center', 'drop-top', 'drop-bottom', 'drop-left', 'drop-right', 'drop-navbar');
+            // Also clear tab reordering indicators
+            const titleElements = Array.from(dock.navbar.querySelectorAll('.sd-panel-title'));
+            titleElements.forEach(el => el.classList.remove('drop-before', 'drop-after'));
         });
 
         this.draggedPanel = null;
         this.draggedFromDock = null;
+        this.currentHoverDock = null;
     }
 
     updateDragGhost = (e) => {
