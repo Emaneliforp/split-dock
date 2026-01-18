@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitDock</title>
+    <link rel="stylesheet" href="demo.css">
+    <link rel="stylesheet" href="split-dock/split-dock.css">
+    <script type="module" src="split-dock/index.js"></script>
+
+</head>
+<body>
+    <div id="app" class="sd-frame horizontal">
+        <!-- Dock 1 -->
+        <div class="sd-dock">
+                <!-- Panel 1: Question -->
+                <div class="sd-panel">
+                    <div class="sd-panel-title">Question</div>
+                    <div class="sd-panel-content">
+                        <div class="question-content">
+                            <h2 class="question-title">1. Two Sum</h2>
+                            <div class="question-text">
+                                <span class="difficulty-badge">Easy</span>
+                            </div>
+                            <p class="question-text">
+                                Given an array of integers <code class="code-inline">nums</code>
+                                and an integer <code class="code-inline">target</code>,
+                                return indices of the two numbers such that they add up to target.
+                            </p>
+                            <p class="question-text">
+                                You may assume that each input would have exactly one solution, and you may not use the same element twice.
+                            </p>
+                            <p class="question-text">You can return the answer in any order.</p>
+
+                            <h3 class="example-title">Example 1:</h3>
+                            <pre class="code-block">
+<strong>Input:</strong> nums = [2,7,11,15], target = 9
+<strong>Output:</strong> [0,1]
+<strong>Explanation:</strong> Because nums[0] + nums[1] == 9, we return [0, 1].</pre>
+
+                            <h3 class="example-title">Example 2:</h3>
+                            <pre class="code-block">
+<strong>Input:</strong> nums = [3,2,4], target = 6
+<strong>Output:</strong> [1,2]</pre>
+
+                            <h3 class="example-title">Constraints:</h3>
+                            <ul class="constraints-list">
+                                <li>2 <= nums.length <= 10<sup>4</sup></li>
+                                <li>-10<sup>9</sup> <= nums[i] <= 10<sup>9</sup></li>
+                                <li>-10<sup>9</sup> <= target <= 10<sup>9</sup></li>
+                                <li>Only one valid answer exists.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Submissions -->
+                <div class="sd-panel">
+                    <div class="sd-panel-title">Submissions</div>
+                    <div class="sd-panel-content">
+                        <div class="submissions-content">
+                            <h2 class="submissions-title">Submissions</h2>
+
+                            <div class="submission-item accepted">
+                                <div class="submission-header">
+                                    <span class="submission-status accepted">✓ Accepted</span>
+                                    <span class="submission-time">5 minutes ago</span>
+                                </div>
+                                <div class="submission-details">
+                                    Runtime: 64 ms | Memory: 42.1 MB
+                                </div>
+                            </div>
+
+                            <div class="submission-item wrong">
+                                <div class="submission-header">
+                                    <span class="submission-status wrong">✗ Wrong Answer</span>
+                                    <span class="submission-time">12 minutes ago</span>
+                                </div>
+                                <div class="submission-details">
+                                    Test case 34/58 failed
+                                </div>
+                            </div>
+
+                            <div class="submission-item accepted">
+                                <div class="submission-header">
+                                    <span class="submission-status accepted">✓ Accepted</span>
+                                    <span class="submission-time">1 hour ago</span>
+                                </div>
+                                <div class="submission-details">
+                                    Runtime: 72 ms | Memory: 41.8 MB
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Dock 2 -->
+        <div class="sd-dock">
+                <!-- Panel 1: Code -->
+                <div class="sd-panel">
+                    <div class="sd-panel-title">Code</div>
+                    <div class="sd-panel-content">
+                        <div class="code-content">
+                            <div class="code-toolbar">
+                                <select class="language-selector">
+                                    <option>JavaScript</option>
+                                    <option>Python3</option>
+                                    <option>Java</option>
+                                    <option>C++</option>
+                                </select>
+                                <button class="run-button">
+                                    ▶ Run Code
+                                </button>
+                            </div>
+
+                            <pre class="code-editor"><span class="syntax-comment">/**</span>
+<span class="syntax-comment"> * @param {number[]} nums</span>
+<span class="syntax-comment"> * @param {number} target</span>
+<span class="syntax-comment"> * @return {number[]}</span>
+<span class="syntax-comment"> */</span>
+<span class="syntax-keyword">var</span> <span class="syntax-function">twoSum</span> = <span class="syntax-keyword">function</span>(<span class="syntax-variable">nums</span>, <span class="syntax-variable">target</span>) {
+    <span class="syntax-keyword">const</span> <span class="syntax-variable">map</span> = <span class="syntax-keyword">new</span> <span class="syntax-class">Map</span>();
+
+    <span class="syntax-keyword">for</span> (<span class="syntax-keyword">let</span> <span class="syntax-variable">i</span> = <span class="syntax-number">0</span>; <span class="syntax-variable">i</span> < <span class="syntax-variable">nums</span>.<span class="syntax-variable">length</span>; <span class="syntax-variable">i</span>++) {
+        <span class="syntax-keyword">const</span> <span class="syntax-variable">complement</span> = <span class="syntax-variable">target</span> - <span class="syntax-variable">nums</span>[<span class="syntax-variable">i</span>];
+
+        <span class="syntax-keyword">if</span> (<span class="syntax-variable">map</span>.<span class="syntax-function">has</span>(<span class="syntax-variable">complement</span>)) {
+            <span class="syntax-keyword">return</span> [<span class="syntax-variable">map</span>.<span class="syntax-function">get</span>(<span class="syntax-variable">complement</span>), <span class="syntax-variable">i</span>];
+        }
+
+        <span class="syntax-variable">map</span>.<span class="syntax-function">set</span>(<span class="syntax-variable">nums</span>[<span class="syntax-variable">i</span>], <span class="syntax-variable">i</span>);
+    }
+
+    <span class="syntax-keyword">return</span> [];
+};</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 2: Console -->
+                <div class="sd-panel">
+                    <div class="sd-panel-title">Console</div>
+                    <div class="sd-panel-content">
+                        <div class="console-content">
+                            <div class="console-header">
+                                Console Output
+                            </div>
+
+                            <div class="test-case passed">
+                                ✓ Test case 1: PASSED
+                            </div>
+                            <div class="test-details">
+                                <div>Input: nums = [2,7,11,15], target = 9</div>
+                                <div>Output: [0,1]</div>
+                                <div>Expected: [0,1]</div>
+                                <div class="test-runtime">Runtime: 2 ms</div>
+                            </div>
+
+                            <div class="test-case passed">
+                                ✓ Test case 2: PASSED
+                            </div>
+                            <div class="test-details">
+                                <div>Input: nums = [3,2,4], target = 6</div>
+                                <div>Output: [1,2]</div>
+                                <div>Expected: [1,2]</div>
+                                <div class="test-runtime">Runtime: 1 ms</div>
+                            </div>
+
+                            <div class="test-case passed">
+                                ✓ Test case 3: PASSED
+                            </div>
+                            <div class="test-details">
+                                <div>Input: nums = [3,3], target = 6</div>
+                                <div>Output: [0,1]</div>
+                                <div>Expected: [0,1]</div>
+                                <div class="test-runtime">Runtime: 1 ms</div>
+                            </div>
+
+                            <div class="test-summary">
+                                All test cases passed! (3/3)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 3: Settings -->
+                <div class="sd-panel">
+                    <div class="sd-panel-title">Settings</div>
+                    <div class="sd-panel-content">
+                        <div class="settings-content">
+                            <h2 class="settings-title">Editor Settings</h2>
+
+                            <div class="settings-section">
+                                <h3 class="settings-section-title">Appearance</h3>
+
+                                <div class="settings-option">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" checked>
+                                        <span>Dark Theme</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-option">
+                                    <label class="label-text">Font Size</label>
+                                    <select class="settings-select">
+                                        <option>12px</option>
+                                        <option selected>14px</option>
+                                        <option>16px</option>
+                                        <option>18px</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="settings-section">
+                                <h3 class="settings-section-title">Editor</h3>
+
+                                <div class="settings-option">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" checked>
+                                        <span>Auto-save</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-option">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" checked>
+                                        <span>Auto-complete</span>
+                                    </label>
+                                </div>
+
+                                <div class="settings-option">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox">
+                                        <span>Vim Mode</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="settings-section">
+                                <h3 class="settings-section-title">Code Execution</h3>
+
+                                <div class="settings-option">
+                                    <label class="label-text">Default Language</label>
+                                    <select class="settings-select">
+                                        <option selected>JavaScript</option>
+                                        <option>Python3</option>
+                                        <option>Java</option>
+                                        <option>C++</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
