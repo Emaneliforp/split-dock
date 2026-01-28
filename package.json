@@ -1,0 +1,39 @@
+{
+  "name": "split-dock",
+  "version": "1.0.0",
+  "description": "A lightweight, flexible docking framework for building split-view layouts with drag-and-drop panel management",
+  "main": "src/index.js",
+  "type": "module",
+  "files": [
+    "src/**/*",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "dock",
+    "docking",
+    "split-view",
+    "layout",
+    "drag-and-drop",
+    "panels",
+    "resizable",
+    "tabs",
+    "ui",
+    "framework"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Emaneliforp/split-dock.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Emaneliforp/split-dock/issues"
+  },
+  "homepage": "https://github.com/Emaneliforp/split-dock#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

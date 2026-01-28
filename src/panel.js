@@ -1,8 +1,11 @@
+import { generateId } from './index.js';
+
 // Panel class - represents a single panel with title and content
 export class Panel {
     constructor(titleElement, contentElement) {
-        this.id = Date.now() + Math.random();
+        this.id = generateId();
         this.dock = null;
+        this.eventListeners = [];
         
         // Use existing elements from HTML or create new ones
         if (titleElement && contentElement) {
@@ -35,6 +38,7 @@ export class Panel {
 
     setupElements() {
         // Make title draggable and ensure it has close button
+        this.titleElement.setAttribute('draggable', 'true');
         this.titleElement.draggable = true;
         
         if (!this.titleElement.querySelector('.sd-panel-close')) {
@@ -48,26 +52,36 @@ export class Panel {
     }
 
     setupEventListeners() {
-        this.titleElement.addEventListener('click', (e) => {
+        const clickHandler = (e) => {
             if (!e.target.classList.contains('sd-panel-close') && this.dock) {
                 this.dock.setActivePanel(this);
             }
-        });
+        };
+        this.titleElement.addEventListener('click', clickHandler);
+        this.eventListeners.push({ element: this.titleElement, event: 'click', handler: clickHandler });
 
-        this.titleElement.querySelector('.sd-panel-close').addEventListener('click', (e) => {
+        const closeHandler = (e) => {
             e.stopPropagation();
             if (this.dock) {
                 this.dock.removePanel(this);
             }
-        });
+        };
+        const closeBtn = this.titleElement.querySelector('.sd-panel-close');
+        closeBtn.addEventListener('click', closeHandler);
+        this.eventListeners.push({ element: closeBtn, event: 'click', handler: closeHandler });
 
-        this.titleElement.addEventListener('dragstart', (e) => this.onDragStart(e));
-        this.titleElement.addEventListener('dragend', (e) => this.onDragEnd(e));
+        const dragStartHandler = (e) => this.onDragStart(e);
+        this.titleElement.addEventListener('dragstart', dragStartHandler);
+        this.eventListeners.push({ element: this.titleElement, event: 'dragstart', handler: dragStartHandler });
+
+        const dragEndHandler = (e) => this.onDragEnd(e);
+        this.titleElement.addEventListener('dragend', dragEndHandler);
+        this.eventListeners.push({ element: this.titleElement, event: 'dragend', handler: dragEndHandler });
     }
 
     onDragStart(e) {
-        if (this.dock && this.dock.getFramework()) {
-            this.dock.getFramework().startDragging(this, this.dock);
+        if (this.dock && this.dock.splitDock) {
+            this.dock.splitDock.startDragging(this, this.dock);
         }
         this.titleElement.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
@@ -75,8 +89,8 @@ export class Panel {
     }
 
     onDragEnd(e) {
-        if (this.dock && this.dock.getFramework()) {
-            this.dock.getFramework().stopDragging();
+        if (this.dock && this.dock.splitDock) {
+            this.dock.splitDock.stopDragging();
         }
         this.titleElement.classList.remove('dragging');
     }
@@ -92,8 +106,17 @@ export class Panel {
     }
 
     remove() {
+        this.destroy();
         this.titleElement.remove();
         this.contentElement.remove();
+    }
+
+    destroy() {
+        // Remove all event listeners
+        this.eventListeners.forEach(({ element, event, handler }) => {
+            element.removeEventListener(event, handler);
+        });
+        this.eventListeners = [];
         this.dock = null;
     }
 }
