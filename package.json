@@ -1,6 +1,6 @@
 {
   "name": "split-dock",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A lightweight, flexible docking framework for building split-view layouts with drag-and-drop panel management",
   "main": "src/index.js",
   "type": "module",
