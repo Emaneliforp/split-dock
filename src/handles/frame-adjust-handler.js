@@ -1,3 +1,5 @@
+import { CONFIG } from '../index.js';
+
 export class FrameAdjustHandler {
     constructor(frame) {
         this.frame = frame;
@@ -6,41 +8,31 @@ export class FrameAdjustHandler {
     }
 
     destroy() {
-        // Remove all resize handles from DOM
         this.handles.forEach(handle => {
-            if (handle && handle.parentNode) {
-                handle.remove();
-            }
+            if (handle && handle.parentNode) handle.remove();
+            
         });
         
-        // Clear arrays
         this.handles = [];
         this.handleListeners = [];
-        
-        // Clear frame reference
         this.frame = null;
     }
 
     setupResizeHandles() {
-        // Clear existing handles
         this.handles.forEach(handle => handle.remove());
         this.handles = [];
 
-        // Only add resize handles if we have a split direction and multiple children
         if (!this.frame.splitDirection || this.frame.children.length < 2) {
             return;
         }
 
-        // Insert resize handles between children
         for (let i = 0; i < this.frame.children.length - 1; i++) {
             const handle = document.createElement('div');
             handle.className = `sd-resize-handle ${this.frame.splitDirection}`;
             
-            // Store indices for resize
             handle.dataset.leftIndex = i;
             handle.dataset.rightIndex = i + 1;
             
-            // Insert handle after the current child
             const currentChild = this.frame.children[i].element;
             currentChild.parentNode.insertBefore(handle, currentChild.nextSibling);
             
@@ -57,7 +49,7 @@ export class FrameAdjustHandler {
         let rightChild = null;
         let containerSize = 0;
 
-        const minSize = 100; // Minimum size in pixels
+        const minSize = CONFIG.layout.minPaneSize;
 
         const onMouseDown = (e) => {
             e.preventDefault();
@@ -80,7 +72,6 @@ export class FrameAdjustHandler {
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
             
-            // Add visual feedback
             handle.style.background = '#1e88e5';
             document.body.style.cursor = this.frame.splitDirection === 'horizontal' ? 'col-resize' : 'row-resize';
         };
@@ -94,9 +85,7 @@ export class FrameAdjustHandler {
             const newLeftSize = leftStartSize + delta;
             const newRightSize = rightStartSize - delta;
 
-            // Enforce minimum sizes
             if (newLeftSize >= minSize && newRightSize >= minSize) {
-                // Calculate flex values relative to the entire container
                 const leftFlex = newLeftSize / containerSize;
                 const rightFlex = newRightSize / containerSize;
 
@@ -109,7 +98,6 @@ export class FrameAdjustHandler {
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
             
-            // Remove visual feedback
             handle.style.background = '';
             document.body.style.cursor = '';
         };

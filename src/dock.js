@@ -1,6 +1,6 @@
 import { Panel } from './panel.js';
-import { DropHandler } from './handles/drop-handler.js';
-import { generateId } from './index.js';
+import { DragDropHandler } from './handles/drag-drop-handler.js';
+import { generateId, CONFIG } from './index.js';
 
 // Dock class - contains panels
 export class Dock {
@@ -10,76 +10,54 @@ export class Dock {
         this.splitDock = parentFrame?.splitDock || null;
         this.panels = [];
         this.activePanel = null;
-        this.eventListeners = [];
+        this.abortController = new AbortController();
         
         this.element = element || document.createElement('div');
         this.initializeElements();
         
-        this.dropHandler = new DropHandler(this);
+        this.dragDropHandler = new DragDropHandler(this);
         
         this.setupEventListeners();
     }
 
     initializeElements() {
         const hasExistingDock = this.element.classList.contains('sd-dock');
+        if (!hasExistingDock) this.element.className = 'sd-dock';
         
-        if (!hasExistingDock) {
-            this.element.className = 'sd-dock';
+        this.navbar = this.element.querySelector('.sd-dock-navbar');
+        if (!this.navbar) {
+            this.navbar = document.createElement('div');
+            this.navbar.className = 'sd-dock-navbar';
+            this.element.insertBefore(this.navbar, this.element.firstChild);
         }
         
-        this.findOrCreateSubElements();
-        
-        if (hasExistingDock) {
-            this.loadPanelsFromHTML();
+        this.content = this.element.querySelector('.sd-dock-content');
+        if (!this.content) {
+            this.content = document.createElement('div');
+            this.content.className = 'sd-dock-content';
+            this.element.appendChild(this.content);
         }
-    }
-
-    findOrCreateSubElements() {
-        this.navbar = this.element.querySelector('.sd-dock-navbar') || this.createNavbar();
-        this.content = this.element.querySelector('.sd-dock-content') || this.createContent();
-    }
-
-    createNavbar() {
-        const navbar = document.createElement('div');
-        navbar.className = 'sd-dock-navbar';
-        this.element.insertBefore(navbar, this.element.firstChild);
-        return navbar;
-    }
-
-    createContent() {
-        const content = document.createElement('div');
-        content.className = 'sd-dock-content';
-        this.element.appendChild(content);
-        return content;
+        
+        if (hasExistingDock) this.loadPanelsFromHTML();
     }
 
     loadPanelsFromHTML() {
-        const panelElements = Array.from(this.element.querySelectorAll('.sd-panel'));
-        
-        panelElements.forEach(panelElement => {
-            const titleEl = panelElement.querySelector('.sd-panel-title');
-            const contentEl = panelElement.querySelector('.sd-panel-content');
-            
-            if (!titleEl || !contentEl) return;
-            
-            panelElement.remove();
-            const panel = new Panel(titleEl, contentEl);
-            this.addPanel(panel);
+        this.element.querySelectorAll('.sd-panel').forEach(panelEl => {
+            const titleEl = panelEl.querySelector('.sd-panel-title');
+            const contentEl = panelEl.querySelector('.sd-panel-content');
+            if (titleEl && contentEl) {
+                panelEl.remove();
+                this.addPanel(new Panel(titleEl, contentEl));
+            }
         });
     }
 
     setupEventListeners() {
-        const dragOverHandler = (e) => this.dropHandler.onDragOver(e);
-        this.element.addEventListener('dragover', dragOverHandler);
-        this.eventListeners.push({ event: 'dragover', handler: dragOverHandler });
-
-        const dropHandler = (e) => this.dropHandler.onDrop(e);
-        this.element.addEventListener('drop', dropHandler);
-        this.eventListeners.push({ event: 'drop', handler: dropHandler });
-
-        const dragLeaveHandler = (e) => this.dropHandler.onDragLeave(e);
-        this.element.addEventListener('dragleave', dragLeaveHandler);
-        this.eventListeners.push({ event: 'dragleave', handler: dragLeaveHandler });
+        const signal = this.abortController.signal;
+        
+        this.element.addEventListener('dragover', (e) => this.dragDropHandler.onDragOver(e, this), { signal });
+        this.element.addEventListener('drop', (e) => this.dragDropHandler.onDrop(e, this), { signal });
+        this.element.addEventListener('dragleave', (e) => this.dragDropHandler.onDragLeave(e, this), { signal });
     }
 
     addPanel(panel) {
@@ -87,11 +65,7 @@ export class Dock {
         this.panels.push(panel);
         this.navbar.appendChild(panel.titleElement);
         this.content.appendChild(panel.contentElement);
-
-        if (this.panels.length === 1) {
-            this.setActivePanel(panel);
-        }
-
+        if (this.panels.length === 1) this.setActivePanel(panel);
         return panel;
     }
 
@@ -106,20 +80,15 @@ export class Dock {
         if (index === -1) return;
 
         this.panels.splice(index, 1);
-
-        if (!skipCheck) {
-            panel.remove();
-        }
+        if (!skipCheck) panel.remove();
 
         if (this.activePanel === panel) {
             this.activePanel = null;
             if (this.panels.length > 0) {
-                const newIndex = Math.min(index, this.panels.length - 1);
-                this.setActivePanel(this.panels[newIndex]);
+                this.setActivePanel(this.panels[Math.min(index, this.panels.length - 1)]);
             }
         }
 
-        // If dock is empty and has parent, remove it
         if (this.panels.length === 0 && this.parentFrame) {
             this.parentFrame.removeChild(this);
         }
@@ -131,26 +100,106 @@ export class Dock {
         this.activePanel = panel;
     }
 
-    remove() {
-        this.destroy();
-        this.element.remove();
+    clearDropIndicators() {
+        this.element.classList.remove('drop-center', 'drop-top', 'drop-bottom', 'drop-left', 'drop-right', 'drop-navbar');
+        this.navbar.querySelectorAll('.sd-panel-title').forEach(el => 
+            el.classList.remove('drop-before', 'drop-after')
+        );
+    }
+
+    showNavbarDropIndicator(e) {
+        const titles = Array.from(this.navbar.querySelectorAll('.sd-panel-title:not(.dragging)'));
+        if (titles.length === 0) return;
+        
+        const firstRect = titles[0].getBoundingClientRect();
+        const lastRect = titles[titles.length - 1].getBoundingClientRect();
+        
+        if (e.clientX < firstRect.left) {
+            titles[0].classList.add('drop-before');
+        } else if (e.clientX > lastRect.right) {
+            titles[titles.length - 1].classList.add('drop-after');
+        } else {
+            const hovered = titles.find(el => {
+                const rect = el.getBoundingClientRect();
+                return e.clientX >= rect.left && e.clientX <= rect.right;
+            });
+            if (hovered) {
+                const rect = hovered.getBoundingClientRect();
+                hovered.classList.add(e.clientX < rect.left + rect.width / 2 ? 'drop-before' : 'drop-after');
+            }
+        }
+    }
+
+    getDropTargetPanelInfo(e) {
+        const titles = Array.from(this.navbar.querySelectorAll('.sd-panel-title:not(.dragging)'));
+        if (titles.length === 0) return null;
+
+        const firstRect = titles[0].getBoundingClientRect();
+        const lastRect = titles[titles.length - 1].getBoundingClientRect();
+
+        let targetTitle, position;
+        if (e.clientX < firstRect.left) {
+            targetTitle = titles[0];
+            position = 'before';
+        } else if (e.clientX > lastRect.right) {
+            targetTitle = titles[titles.length - 1];
+            position = 'after';
+        } else {
+            targetTitle = titles.find(el => {
+                const rect = el.getBoundingClientRect();
+                return e.clientX >= rect.left && e.clientX <= rect.right;
+            });
+            if (targetTitle) {
+                const rect = targetTitle.getBoundingClientRect();
+                position = e.clientX < rect.left + rect.width / 2 ? 'before' : 'after';
+            }
+        }
+
+        const panel = this.panels.find(p => p.titleElement === targetTitle);
+        return panel ? { panel, position } : null;
+    }
+
+    reorderPanel(panel, targetPanel, position) {
+        const panelIdx = this.panels.indexOf(panel);
+        const targetIdx = this.panels.indexOf(targetPanel);
+        if (panelIdx === -1 || targetIdx === -1) return;
+
+        this.panels.splice(panelIdx, 1);
+        let newIdx = targetIdx + (position === 'after' ? 1 : 0);
+        if (panelIdx < targetIdx) newIdx--;
+        this.panels.splice(newIdx, 0, panel);
+
+        const refNode = position === 'before' ? targetPanel.titleElement : targetPanel.titleElement.nextSibling;
+        this.navbar.insertBefore(panel.titleElement, refNode);
+    }
+
+    acceptPanelAt(panel, fromDock, targetPanel, position) {
+        fromDock.removePanel(panel, true);
+
+        const targetIdx = this.panels.indexOf(targetPanel);
+        if (targetIdx === -1) {
+            this.addPanel(panel);
+            return;
+        }
+
+        panel.dock = this;
+        this.panels.splice(position === 'before' ? targetIdx : targetIdx + 1, 0, panel);
+        
+        const refNode = position === 'before' ? targetPanel.titleElement : targetPanel.titleElement.nextSibling;
+        this.navbar.insertBefore(panel.titleElement, refNode);
+        this.content.appendChild(panel.contentElement);
+        this.setActivePanel(panel);
     }
 
     destroy() {
-        // Remove all event listeners
-        this.eventListeners.forEach(({ event, handler }) => {
-            this.element.removeEventListener(event, handler);
-        });
-        this.eventListeners = [];
-
-        // Destroy all panels
+        this.abortController.abort();
         this.panels.forEach(panel => panel.destroy());
         this.panels = [];
-        
-        // Clear references
         this.activePanel = null;
         this.parentFrame = null;
         this.splitDock = null;
-        this.dropHandler = null;
+        this.dragDropHandler?.destroy();
+        this.dragDropHandler = null;
+        this.element.remove();
     }
 }
