@@ -1,6 +1,3 @@
-# Docs files
-docs/
-
 # Git
 .git
 .gitignore
@@ -14,3 +11,6 @@ docs/
 # OS
 .DS_Store
 Thumbs.db
+
+#demo
+demo/

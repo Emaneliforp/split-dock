@@ -11,23 +11,7 @@ export const CONFIG = {
         dragGhostOffset: 10,        // Offset in pixels for drag ghost
         defaultFlexBasis: '1 1 0px' // Default flex basis for splits
     },
-    
-    // UI constants
-    ui: {
-        closeButtonSymbol: '×',     // Close button character
-        defaultPanelTitle: 'New Panel'
-    }
 };
-
-(function loadCSS() {
-    const existingLink = document.querySelector('link[href*="style.css"]');
-    if (!existingLink) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = new URL('./style.css', import.meta.url).href;
-        document.head.appendChild(link);
-    }
-})();
 
 let idCounter = 0;
 export function generateId() {
@@ -41,12 +25,11 @@ export class SplitDock {
     }
 
     initialize() {
-        const rootElement = document.getElementById('app');
-        if (rootElement && rootElement.classList.contains('sd-frame')) {
+        const rootElements = document.querySelectorAll('.sd-frame');
+        rootElements.forEach(rootElement => {
             const rootFrame = new Frame(rootElement, this);
             this.rootFrames.push(rootFrame);
-        }
-
+        });
         return this;
     }
 

@@ -5,6 +5,7 @@ export class FrameAdjustHandler {
         this.frame = frame;
         this.handles = [];
         this.handleListeners = [];
+        this.dockSizes = []; // Stores relative sizes for each child dock/frame
     }
 
     destroy() {
@@ -15,6 +16,7 @@ export class FrameAdjustHandler {
         
         this.handles = [];
         this.handleListeners = [];
+        this.dockSizes = [];
         this.frame = null;
     }
 
@@ -23,8 +25,12 @@ export class FrameAdjustHandler {
         this.handles = [];
 
         if (!this.frame.splitDirection || this.frame.children.length < 2) {
+            this.dockSizes = [];
             return;
         }
+
+        // Initialize dock sizes from current flex values
+        this.updateDockSizesFromDOM();
 
         for (let i = 0; i < this.frame.children.length - 1; i++) {
             const handle = document.createElement('div');
@@ -91,6 +97,10 @@ export class FrameAdjustHandler {
 
                 leftChild.element.style.flex = `${leftFlex} 1 0px`;
                 rightChild.element.style.flex = `${rightFlex} 1 0px`;
+                
+                // Update stored dock sizes
+                this.dockSizes[leftIndex] = leftFlex;
+                this.dockSizes[rightIndex] = rightFlex;
             }
         };
 
@@ -100,8 +110,87 @@ export class FrameAdjustHandler {
             
             handle.style.background = '';
             document.body.style.cursor = '';
+            
+            // Normalize dock sizes after resize to ensure they sum to 1
+            this.normalizeDockSizes();
         };
 
         handle.addEventListener('mousedown', onMouseDown);
+    }
+
+    // Get current dock sizes from DOM flex values
+    updateDockSizesFromDOM() {
+        if (this.frame.children.length === 0) {
+            this.dockSizes = [];
+            return;
+        }
+
+        const sizes = this.frame.children.map(child => {
+            const flex = child.element.style.flex;
+            if (flex) {
+                const flexGrow = parseFloat(flex.split(' ')[0]);
+                return isNaN(flexGrow) ? 1 : flexGrow;
+            }
+            return 1;
+        });
+
+        const total = sizes.reduce((sum, size) => sum + size, 0);
+        this.dockSizes = sizes.map(size => size / total);
+    }
+
+    // Apply stored dock sizes to DOM elements
+    applyDockSizes() {
+        if (this.dockSizes.length !== this.frame.children.length) {
+            return;
+        }
+
+        this.frame.children.forEach((child, i) => {
+            child.element.style.flex = `${this.dockSizes[i]} 1 0px`;
+        });
+    }
+
+    // Normalize dock sizes to sum to 1.0
+    normalizeDockSizes() {
+        if (this.dockSizes.length === 0) return;
+
+        const total = this.dockSizes.reduce((sum, size) => sum + size, 0);
+        if (total > 0) {
+            this.dockSizes = this.dockSizes.map(size => size / total);
+            this.applyDockSizes();
+        }
+    }
+
+    // Redistribute space evenly among all docks
+    redistributeEvenly() {
+        const count = this.frame.children.length;
+        if (count === 0) {
+            this.dockSizes = [];
+            return;
+        }
+
+        const evenSize = 1 / count;
+        this.dockSizes = new Array(count).fill(evenSize);
+        this.applyDockSizes();
+    }
+
+    // Redistribute space when a dock is removed (evenly)
+    redistributeOnRemove(removedIndex) {
+        if (this.dockSizes.length === 0 || removedIndex >= this.dockSizes.length) {
+            return;
+        }
+
+        this.dockSizes.splice(removedIndex, 1);
+
+        if (this.dockSizes.length === 0) {
+            return;
+        }
+
+        // Redistribute evenly among remaining docks
+        this.redistributeEvenly();
+    }
+
+    // Redistribute space when a dock is added (evenly)
+    redistributeOnAdd() {
+        this.redistributeEvenly();
     }
 }

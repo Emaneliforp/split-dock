@@ -61,7 +61,10 @@ export class Frame {
 
         if (this.children.length === 1) this.promoteChild();
         else if (this.isEmpty()) this.handleEmptyFrame();
-        else this.updateStyles();
+        else {
+            this.adjustHandler.redistributeOnRemove(index);
+            this.updateStyles();
+        }
     }
 
     promoteChild() {
@@ -142,9 +145,8 @@ export class Frame {
         const refNode = insertBefore ? dock.element : dock.element.nextSibling;
         this.element.insertBefore(newDock.element, refNode);
 
-        dock.element.style.flex = CONFIG.layout.defaultFlexBasis;
-        newDock.element.style.flex = CONFIG.layout.defaultFlexBasis;
         this.updateStyles();
+        this.adjustHandler.redistributeOnAdd();
     }
 
     initializeSplit(direction, newDock, currentIndex) {
@@ -170,8 +172,7 @@ export class Frame {
         wrapper.children = insertBefore ? [newDock, dock] : [dock, newDock];
         wrapper.children.forEach(child => wrapper.element.appendChild(child.element));
 
-        dock.element.style.flex = CONFIG.layout.defaultFlexBasis;
-        newDock.element.style.flex = CONFIG.layout.defaultFlexBasis;
         wrapper.updateStyles();
+        wrapper.adjustHandler.redistributeOnAdd();
     }
 }

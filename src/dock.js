@@ -42,11 +42,16 @@ export class Dock {
     }
 
     loadPanelsFromHTML() {
-        this.element.querySelectorAll('.sd-panel').forEach(panelEl => {
+        // Collect all panel elements first
+        const panelElements = Array.from(this.element.querySelectorAll('.sd-panel'));
+        
+        panelElements.forEach(panelEl => {
             const titleEl = panelEl.querySelector('.sd-panel-title');
             const contentEl = panelEl.querySelector('.sd-panel-content');
             if (titleEl && contentEl) {
+                // Remove from DOM
                 panelEl.remove();
+                // Create and add panel
                 this.addPanel(new Panel(titleEl, contentEl));
             }
         });

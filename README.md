@@ -60,8 +60,6 @@ CONFIG.layout.minPaneSize = 150;        // Minimum pane size (px)
 CONFIG.layout.dropZoneRatio = 0.25;     // Drop zone edge ratio
 CONFIG.layout.dragGhostOffset = 15;     // Drag ghost offset (px)
 CONFIG.layout.defaultFlexBasis = '1 1 0px';
-CONFIG.ui.closeButtonSymbol = '×';
-CONFIG.ui.defaultPanelTitle = 'New Panel';
 ```
 
 ## License

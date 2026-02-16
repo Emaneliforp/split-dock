@@ -13,7 +13,7 @@ export class Panel {
             this.title = titleElement.textContent.trim();
             this.content = contentElement.innerHTML;
         } else {
-            this.title = titleElement || CONFIG.ui.defaultPanelTitle;
+            this.title = titleElement;
             this.content = contentElement || '';
             this.createElements();
         }
@@ -26,7 +26,7 @@ export class Panel {
         this.titleElement.className = 'sd-panel-title';
         this.titleElement.innerHTML = `
             <span class="sd-panel-title-text">${this.title}</span>
-            <span class="sd-panel-close">${CONFIG.ui.closeButtonSymbol}</span>
+            <span class="sd-panel-close">×</span>
         `;
 
         this.contentElement = document.createElement('div');
@@ -41,7 +41,7 @@ export class Panel {
         if (!this.titleElement.querySelector('.sd-panel-close')) {
             const closeBtn = document.createElement('span');
             closeBtn.className = 'sd-panel-close';
-            closeBtn.textContent = CONFIG.ui.closeButtonSymbol;
+            closeBtn.textContent = '×';
             this.titleElement.appendChild(closeBtn);
         }
 
